@@ -468,4 +468,4 @@ var Socket;
     }());
     Socket.Adapter = Adapter;
 })(Socket || (Socket = {}));
-//# sourceMappingURL=goTransport-angular1.js.map
+//# sourceMappingURL=goTransport-client.js.map

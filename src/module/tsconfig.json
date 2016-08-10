@@ -5,19 +5,7 @@
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "outFile": "../../dist/goTransport-angular1.js",
+    "outFile": "../../dist/goTransport-client.js",
     "sourceMap": true
   }
-//  "files": [
-//    //util
-//    "utils/global.d.ts",
-//    //socket
-//    "Socket/Socket.ts",
-//    "Socket/SockJSClient.ts",
-//
-//    "app.module.ts",
-//    "app.goTransport.ts",
-//    "Message.ts",
-//    "handlers/handler.ts"
-//  ]
 }
