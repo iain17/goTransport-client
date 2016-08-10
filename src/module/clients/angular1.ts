@@ -20,7 +20,7 @@ module goTransport {
     //Attach the above to angular
     "use strict";
     angular
-        .module("goTransport", ['bd.sockjs']);
+        .module("goTransport", []);
     angular
         .module("goTransport")
         .factory("goTransport", ["$q", Angular1.getInstance]);
