@@ -270,7 +270,9 @@ var goTransport;
             console.log('Received request to call a method', this.name);
             var method = this.GetSession().GetClient().getMethod(this.name);
             if (method != null) {
-                var result = method.apply(this, this.parameters);
+                var result = [
+                    method.apply(this, this.parameters)
+                ];
                 console.debug('replying back with result:', result);
                 this.Reply(new goTransport.MessageMethodResult(true, result));
             }
