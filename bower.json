@@ -1,0 +1,27 @@
+{
+  "name": "goTransport-client",
+  "main": "dist/goTransport.js",
+  "authors": [
+    "Iain Munro iain.munro@imunro.nl"
+  ],
+  "description": "goTransport client module",
+  "keywords": [
+    "goTransport",
+    "client",
+    "Angular",
+    "Angular 1x"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "sockjs-client": "^1.1.1",
+    "angular": "^1.5.7"
+  }
+}
