@@ -219,8 +219,8 @@ var goTransport;
     var MessageError = (function (_super) {
         __extends(MessageError, _super);
         function MessageError(reason) {
+            this.reason = reason.message;
             _super.call(this, MessageError.type);
-            this.reason = reason;
         }
         MessageError.prototype.GetReason = function () {
             return this.reason;
@@ -270,11 +270,9 @@ var goTransport;
             console.log('Received request to call a method', this.name);
             var method = this.GetSession().GetClient().getMethod(this.name);
             if (method != null) {
-                var result = [
+                this.Reply(new goTransport.MessageMethodResult(true, [
                     method.apply(this, this.parameters)
-                ];
-                console.debug('replying back with result:', result);
-                this.Reply(new goTransport.MessageMethodResult(true, result));
+                ]));
             }
             return null;
         };
@@ -369,7 +367,8 @@ var goTransport;
         Session.prototype.connect = function (url) {
             this.connectedPromise = new goTransport.Promise();
             if (this.socket == null) {
-                this.socket = Socket.Adapter.getSocket("SockJSClient", url, this);
+                this.socket = Socket.Adapter.getSocket("SockJSClient", this);
+                this.socket.connect(url);
             }
             return this.getConnectedPromise();
         };
@@ -409,6 +408,7 @@ var goTransport;
         };
         Session.prototype.disconnected = function (code, reason, wasClean) {
             console.warn('Disconnected', code);
+            this.currentId = 0;
         };
         return Session;
     }());
@@ -417,24 +417,39 @@ var goTransport;
 var Socket;
 (function (Socket) {
     var SockJSClient = (function () {
-        function SockJSClient(url, delegate) {
+        function SockJSClient(delegate) {
             this.delegate = delegate;
+        }
+        SockJSClient.prototype.connect = function (url) {
+            if (this.connection) {
+                this.close();
+            }
+            this.url = url;
             this.connection = new SockJS(url);
             this.connection.onopen = this.open.bind(this);
             this.connection.onclose = this.disconnect.bind(this);
             this.connection.onmessage = this.message.bind(this);
-        }
-        SockJSClient.getInstance = function (url, delegate) {
+        };
+        SockJSClient.getInstance = function (delegate) {
             if (!SockJSClient.instance) {
-                SockJSClient.instance = new SockJSClient(url, delegate);
+                SockJSClient.instance = new SockJSClient(delegate);
             }
             return SockJSClient.instance;
         };
         SockJSClient.prototype.open = function (e) {
+            this.connected = true;
             this.delegate.connected();
         };
         SockJSClient.prototype.disconnect = function (e) {
-            this.delegate.disconnected(e.code, e.reason, e.wasClean);
+            if (this.connected) {
+                this.delegate.disconnected(e.code, e.reason, e.wasClean);
+                this.connected = false;
+            }
+            if (e.code != 205) {
+                setTimeout(function () {
+                    this.connect(this.url);
+                }.bind(this), 3000);
+            }
         };
         SockJSClient.prototype.message = function (e) {
             this.delegate.messaged(e.data);
@@ -454,10 +469,10 @@ var Socket;
     var Adapter = (function () {
         function Adapter() {
         }
-        Adapter.getSocket = function (type, url, delegate) {
+        Adapter.getSocket = function (type, delegate) {
             switch (type) {
                 case "SockJSClient":
-                    return Socket.SockJSClient.getInstance(url, delegate);
+                    return Socket.SockJSClient.getInstance(delegate);
                 default:
                     throw ("Invalid socket type:" + type);
             }

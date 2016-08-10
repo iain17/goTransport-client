@@ -7,16 +7,17 @@ module Socket {
     }
 
     export interface Socket {
-        send(data:string): void;
-        close(): void;
+        connect(url:string):void;
+        send(data:string):void;
+        close():void;
     }
 
     export class Adapter {
-        static getSocket(type: string, url: string, delegate: Socket.SocketDelegate):Socket.Socket {
+        static getSocket(type: string, delegate: Socket.SocketDelegate):Socket.Socket {
             switch(type) {
 
                 case "SockJSClient":
-                    return SockJSClient.getInstance(url, delegate);
+                    return SockJSClient.getInstance(delegate);
                 default:
                     throw("Invalid socket type:"+type)
             }

@@ -3,8 +3,10 @@ module goTransport {
     export class MessageError extends Message{
         static type = MessageType.MessageTypeError;
         private promise : Promise;
+        private reason:string;
 
-        constructor(public reason: any) {
+        constructor(reason: Error) {
+            this.reason = reason.message;
             super(MessageError.type);
         }
 

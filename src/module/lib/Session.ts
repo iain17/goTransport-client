@@ -32,7 +32,8 @@ module goTransport {
         public connect(url : string): IPromise<{}> {
             this.connectedPromise = new Promise();
             if(this.socket == null) {
-                this.socket = Socket.Adapter.getSocket("SockJSClient", url, this);
+                this.socket = Socket.Adapter.getSocket("SockJSClient", this);
+                this.socket.connect(url);
             }
             return this.getConnectedPromise();
         }
@@ -85,6 +86,7 @@ module goTransport {
         //TODO: Reconnect?
         disconnected(code:number, reason:string, wasClean:boolean) {
             console.warn('Disconnected', code)
+            this.currentId = 0;
         }
 
     }

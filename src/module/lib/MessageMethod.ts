@@ -18,11 +18,11 @@ module goTransport {
             let method = this.GetSession().GetClient().getMethod(this.name);
 
             if(method != null) {
-                let result = [
-                    method.apply(this, this.parameters)
-                ];
-                console.debug('replying back with result:', result);
-                this.Reply(new MessageMethodResult(true, result));
+                this.Reply(
+                    new MessageMethodResult(true, [
+                        method.apply(this, this.parameters)
+                    ])
+                );
             }
             return null;
         }
