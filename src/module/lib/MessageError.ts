@@ -16,12 +16,12 @@ module goTransport {
             return null;
         }
 
-        Received(): Error {
+        Received(previousMessage: Message): Error {
             console.error(this.reason);
 
             //TODO: On error method maybe?
-            if((this.previousMessage instanceof MessageMethod)) {
-                let promise = (this.previousMessage as MessageMethod).getPromise();
+            if((previousMessage instanceof MessageMethod)) {
+                let promise = (previousMessage as MessageMethod).getPromise();
                 if(promise) {
                     promise.reject(this.reason);
                 }

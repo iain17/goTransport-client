@@ -42,13 +42,13 @@ module goTransport {
         }
 
         public setPreviousMessage(message: Message) {
-            console.log('messageManager', 'setPreviousMessage', message.id);
-            this.messages[message.id] = message;
+            console.log('messageManager', 'setPreviousMessage', message.GetId());
+            this.messages[message.GetId()] = message;
         }
 
         private getPreviousMessage(message: Message): Message {
-            console.log('messageManager', 'getPreviousMessage', message.id, this.messages[message.id]);
-            return this.messages[message.id];
+            console.log('messageManager', 'getPreviousMessage', message.GetId(), this.messages[message.GetId()]);
+            return this.messages[message.GetId()];
         }
 
         connected() {
@@ -66,18 +66,15 @@ module goTransport {
 
         //Receive a message from the server
         messaged(data:string) {
-            console.debug('received', data);
-
+            console.debug('Received: ', data);
             let message = Message.unSerialize(data);
-            message.Initialize(this);
             if(!message) {
                 console.warn("Invalid message received.");
                 return;
             }
+            message.Initialize(this);
 
-            //Set the previous message that was sent for this message id.
-            message.setPreviousMessage(this.getPreviousMessage(message));
-            var error = message.Received();
+            var error = message.Received(this.getPreviousMessage(message));
             if (error != null) {
                 console.error(error);
             }

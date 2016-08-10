@@ -2,7 +2,6 @@ module goTransport {
 
     export abstract class Message{
         id:number;
-        protected previousMessage: Message;
         private static headerDelimiter = "\f";
         private session : Session;
 
@@ -34,15 +33,11 @@ module goTransport {
             return this.type;
         }
 
-        public setPreviousMessage(message: Message) {
-            this.previousMessage = message;
-        }
-
         //Sending the message.
         abstract Sending(): Error
 
         //Received the message.
-        abstract Received(): Error
+        abstract Received(previousMessage: Message): Error
 
         // toJSON is automatically used by JSON.stringify
         static serialize(message : Message): string {

@@ -11,13 +11,13 @@ module goTransport {
             return null;
         }
 
-        Received(): Error {
-            if(!(this.previousMessage instanceof MessageMethod)) {
+        Received(previousMessage: Message): Error {
+            if(!(previousMessage instanceof MessageMethod)) {
                 return new Error("Invalid previousMessage. Not messageMethod.");
             }
 
             console.log('Result came back!', this.parameters);
-            let promise = (this.previousMessage as MessageMethod).getPromise();
+            let promise = (previousMessage as MessageMethod).getPromise();
             if(promise) {
                 promise.resolve.apply(promise, this.parameters);
             }

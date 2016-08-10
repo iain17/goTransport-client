@@ -13,7 +13,7 @@ module goTransport {
             return null;
         }
 
-        Received(): Error {
+        Received(previousMessage: Message): Error {
             console.log('Received request to call a method', this.name);
             let method = this.GetSession().GetClient().getMethod(this.name);
 

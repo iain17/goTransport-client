@@ -55,7 +55,7 @@ var goTransport;
     goTransport.Angular1 = Angular1;
     "use strict";
     angular
-        .module("goTransport", ['bd.sockjs']);
+        .module("goTransport", []);
     angular
         .module("goTransport")
         .factory("goTransport", ["$q", Angular1.getInstance]);
@@ -121,9 +121,6 @@ var goTransport;
         };
         Message.prototype.GetType = function () {
             return this.type;
-        };
-        Message.prototype.setPreviousMessage = function (message) {
-            this.previousMessage = message;
         };
         Message.serialize = function (message) {
             return message.GetType() + Message.headerDelimiter + JSON.stringify(message);
@@ -231,10 +228,10 @@ var goTransport;
         MessageError.prototype.Sending = function () {
             return null;
         };
-        MessageError.prototype.Received = function () {
+        MessageError.prototype.Received = function (previousMessage) {
             console.error(this.reason);
-            if ((this.previousMessage instanceof goTransport.MessageMethod)) {
-                var promise = this.previousMessage.getPromise();
+            if ((previousMessage instanceof goTransport.MessageMethod)) {
+                var promise = previousMessage.getPromise();
                 if (promise) {
                     promise.reject(this.reason);
                 }
@@ -269,7 +266,7 @@ var goTransport;
             this.promise = new goTransport.Promise();
             return null;
         };
-        MessageMethod.prototype.Received = function () {
+        MessageMethod.prototype.Received = function (previousMessage) {
             console.log('Received request to call a method', this.name);
             var method = this.GetSession().GetClient().getMethod(this.name);
             if (method != null) {
@@ -316,12 +313,12 @@ var goTransport;
         MessageMethodResult.prototype.Sending = function () {
             return null;
         };
-        MessageMethodResult.prototype.Received = function () {
-            if (!(this.previousMessage instanceof goTransport.MessageMethod)) {
+        MessageMethodResult.prototype.Received = function (previousMessage) {
+            if (!(previousMessage instanceof goTransport.MessageMethod)) {
                 return new Error("Invalid previousMessage. Not messageMethod.");
             }
             console.log('Result came back!', this.parameters);
-            var promise = this.previousMessage.getPromise();
+            var promise = previousMessage.getPromise();
             if (promise) {
                 promise.resolve.apply(promise, this.parameters);
             }
@@ -378,12 +375,12 @@ var goTransport;
             return this.connectedPromise.promise;
         };
         Session.prototype.setPreviousMessage = function (message) {
-            console.log('messageManager', 'setPreviousMessage', message.id);
-            this.messages[message.id] = message;
+            console.log('messageManager', 'setPreviousMessage', message.GetId());
+            this.messages[message.GetId()] = message;
         };
         Session.prototype.getPreviousMessage = function (message) {
-            console.log('messageManager', 'getPreviousMessage', message.id, this.messages[message.id]);
-            return this.messages[message.id];
+            console.log('messageManager', 'getPreviousMessage', message.GetId(), this.messages[message.GetId()]);
+            return this.messages[message.GetId()];
         };
         Session.prototype.connected = function () {
             console.log('connected');
@@ -396,15 +393,14 @@ var goTransport;
             }.bind(this));
         };
         Session.prototype.messaged = function (data) {
-            console.debug('received', data);
+            console.debug('Received: ', data);
             var message = goTransport.Message.unSerialize(data);
-            message.Initialize(this);
             if (!message) {
                 console.warn("Invalid message received.");
                 return;
             }
-            message.setPreviousMessage(this.getPreviousMessage(message));
-            var error = message.Received();
+            message.Initialize(this);
+            var error = message.Received(this.getPreviousMessage(message));
             if (error != null) {
                 console.error(error);
             }
